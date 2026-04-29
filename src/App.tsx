@@ -1,11 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "./assets/vite.svg";
+import heroImg from "./assets/hero.png";
+import "./App.css";
+import { default as axios } from "axios";
 
-function App() {
-  const [count, setCount] = useState(0)
+const REFRESH_INTERVAL = 4000;
+
+const App = () => {
+  const [count, setCount] = useState(0);
+  const [backendReqCount, setBackendReqCount] = useState(0);
+
+  useEffect(() => {
+    let timerID: number | undefined;
+
+    const refreshToken = async () => {
+      axios.get("/api/token/refresh", {
+        headers: { "x-request-count": backendReqCount },
+      });
+      setBackendReqCount((count) => count + 1);
+      timerID = setTimeout(refreshToken, REFRESH_INTERVAL);
+    };
+
+    refreshToken();
+
+    return () => {
+      clearTimeout(timerID);
+    };
+  }, []);
 
   return (
     <>
@@ -27,6 +49,13 @@ function App() {
           onClick={() => setCount((count) => count + 1)}
         >
           Count is {count}
+        </button>
+        <button
+          type="button"
+          className="counter"
+          onClick={() => setCount((count) => count + 1)}
+        >
+          Backend requests made: {backendReqCount}
         </button>
       </section>
 
@@ -116,7 +145,7 @@ function App() {
       <div className="ticks"></div>
       <section id="spacer"></section>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

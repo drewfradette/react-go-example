@@ -8,3 +8,5 @@ build:
 
   go build -o app ./...
 
+dev:
+  goreman start
